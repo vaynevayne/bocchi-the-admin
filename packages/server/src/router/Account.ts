@@ -27,7 +27,9 @@ const accountRouter = router({
         }),
       }),
     )
-    .query(async ({ input: { sort, filter, page } }) => {
+    .query(async ({ ctx, input: { sort, filter, page } }) => {
+      console.log('ctx', ctx.req.ip);
+
       const filterParams = paramsToFilter(filter || {});
 
       const result = await prisma.$transaction([

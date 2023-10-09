@@ -34,6 +34,8 @@ model Account {
   updateAt DateTime @updatedAt @default(now())
   deleteAt DateTime?
   version Int @default(1)
+  loginLogs LoginLog[]
+
 }
 
 model User {
@@ -47,8 +49,9 @@ model User {
   updateAt DateTime @updatedAt @default(now())
   deleteAt DateTime?
   version Int @default(1)
-  accountId Int @unique
+  accountId Int @unique @default(autoincrement())
   account Account  @relation(fields: [accountId], references: [id])
+ 
 }
 
 model Role {
@@ -57,4 +60,18 @@ model Role {
   permissions Int[]
   user User[]
   version Int @default(1)
+}
+
+model LoginLog {
+  id Int @id @default(autoincrement())
+  accountId Int
+  account Account @relation(fields:[accountId],references: [id])
+  ip String
+  address String?
+  browser String?
+  os String?
+  status Boolean?
+  message String?
+  username String
+
 }

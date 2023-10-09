@@ -37,6 +37,7 @@ export const UserOptionalDefaultsSchema = UserSchema.merge(z.object({
   createAt: z.coerce.date().optional(),
   updateAt: z.coerce.date().optional(),
   version: z.number().int().optional(),
+  accountId: z.number().int().optional(),
 }))
 
 export type UserOptionalDefaults = z.infer<typeof UserOptionalDefaultsSchema>

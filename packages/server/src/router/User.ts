@@ -1,3 +1,4 @@
+import { LoginLog } from './../constants/zodSchema/modelSchema/LoginLogSchema';
 import publicProcedure from '@server/procedure/public';
 import { router } from '@server/initTRPC';
 import z from 'zod';
@@ -15,6 +16,7 @@ import {
   UserSchema,
 } from '../constants/zodSchema';
 import AuthTree from '@bta/common/AuthTree';
+import { getAddressByIp, getUserAgent } from '@server/utils/LoginLogUtil';
 
 const userRouter = router({
   signIn: publicProcedure
@@ -29,8 +31,8 @@ const userRouter = router({
           ),
       }),
     )
-    .mutation(async ({ input }) => {
-      const account = await prisma.account.findFirst({
+    .mutation(async ({ ctx, input }) => {
+      let account = await prisma.account.findFirst({
         where: {
           password: input.password,
           OR: [
@@ -53,13 +55,58 @@ const userRouter = router({
           },
         },
       });
+
+      if (!account) {
+        // 不存在则创建
+        const creacted = await prisma.account
+          .create({
+            data: {
+              account: input.account,
+              password: input.password,
+            },
+            include: {
+              user: true,
+            },
+          })
+          .catch((err) => console.error('creacted:err', err));
+        console.log('creacted', creacted);
+        account = creacted as any;
+      }
+
+      console.log('account', account);
+
+      // 记录登录日志
+
+      try {
+        console.log('loginlog');
+
+        const createdLog = await prisma.loginLog.create({
+          data: {
+            ip: ctx.req.ip,
+            username: account?.account,
+            address: getAddressByIp(ctx.req.ip),
+            browser: getUserAgent(ctx).family,
+            os: getUserAgent(ctx).os.toString(),
+            account: {
+              connect: {
+                id: account?.id,
+              },
+            },
+          },
+        });
+        console.log('createdLog', createdLog);
+      } catch (err) {
+        console.error('...', err);
+      }
+
       return account
         ? {
             user: account.user,
-            authorization: JWTUtil.encode({ id: account.user[0].id }),
+            authorization: JWTUtil.encode({ id: account.user[0]?.id }),
           }
         : throwTRPCBadRequestError('登陆失败，请检查用户名或密码是否正确');
     }),
+
   getUserInfoByToken: authProcedure.query(({ ctx }) => ctx.user),
   queryUsers: authProcedure
     .meta({

@@ -2,6 +2,7 @@ export { TransactionIsolationLevelSchema } from './TransactionIsolationLevelSche
 export { AccountScalarFieldEnumSchema } from './AccountScalarFieldEnumSchema';
 export { UserScalarFieldEnumSchema } from './UserScalarFieldEnumSchema';
 export { RoleScalarFieldEnumSchema } from './RoleScalarFieldEnumSchema';
+export { LoginLogScalarFieldEnumSchema } from './LoginLogScalarFieldEnumSchema';
 export { SortOrderSchema } from './SortOrderSchema';
 export { QueryModeSchema } from './QueryModeSchema';
 export { NullsOrderSchema } from './NullsOrderSchema';
